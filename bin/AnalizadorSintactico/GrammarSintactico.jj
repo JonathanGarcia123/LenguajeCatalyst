@@ -1,0 +1,404 @@
+options{
+	IGNORE_CASE = false;
+	STATIC = true;
+	BUILD_PARSER = true;
+}
+
+PARSER_BEGIN(AlquimiaParser)
+package AnalizadorSintactico;
+public class AlquimiaParser
+{
+	public static void main(String args[])
+	{	
+		try{
+			AlquimiaParser parser = new AlquimiaParser(System.in);
+			System.out.println("Bienvenido al compilador Catalyst.");
+			parser.programaPrincipal();
+			System.out.println("Tu Programa Compilo Correctamente");
+		}catch(ParseException e){
+			System.err.println("Error: "+ e.getMessage());
+		}
+	}
+}
+
+PARSER_END(AlquimiaParser)
+ 
+//PALABRAS RESERVADAS
+TOKEN: {
+	<COMIENZO : "funcion clasePrincipal"> //Palabra para crear el main.
+|	<MERCURIO : "mercurio"> //variable
+|	<ORO : "oro"> //constante
+|	<RUNA : "runa"> //char
+|	<PIEDRA : "piedra"> //int
+|	<ELIXIR : "elixir"> //float
+|	<PERGAMINO : "pergamino"> //string
+|	<ESENCIA : "esencia"> //boolean
+|	<CATALIZAR : "catalizar"> //if
+|	<INERTE : "inerte"> //else
+|	<HERVIR : "hervir"> //while
+|	<CALCINAR : "calcinar"> //for
+|	<CRISOL : "crisol"> //switch
+|	<FASE : "fase"> //case
+|	<DEFECTO : "defecto"> //default
+|	<REVELAR : "revelar"> //print
+|	<PURO : "puro"> //true
+|	<IMPURO : "impuro"> //false
+|	<ROMPER : "romper"> //break
+|	<CONGELAR : "congelar"> //do
+|	<FUNCION : "funcion">
+|	<RETORNO : "retorno">
+}
+ 
+//OPERADORES
+TOKEN: {
+    < MEZCLAR : "mezclar" > //suma
+|   < SEPARAR : "separar" > //resta
+|   < FUSIONAR : "fusionar" > //multiplicacion
+|   < DESTILAR : "destilar" > //division
+|   < TRANSMUTAR : "transmutar" > //asignacion
+|   < EQUIVALENTE : "==" >
+|   < DD : "!=" >
+|   < MEQ : "<" >
+|   < MAQ : ">" >
+|   < MAQI : ">=" >
+|   < MEQI : "<=" >
+|   < YY : "&&" >
+|   < OO : "||" >
+|   < NO : "!" >
+}
+ 
+//SIGNOS DE PUNTUACION, APERTURA Y SIMBOLOS
+TOKEN : {
+    < AP : "(" >
+|   < CP : ")" >
+|   < ALL : "{" >
+|   < CLL : "}" >
+|   < AC : "[" >
+|   < CC : "]" >
+|   < COMA : "," >
+|   < PC : ";" >
+|	< CD : "\"">
+|	< INC : "++">
+|	< DEC : "--">
+|	< DP : ":">
+|   <ON : "~">
+}
+
+TOKEN : {
+    < IDENTIFIER : (["a"-"z", "A"-"Z", "_"]) (["a"-"z", "A"-"Z", "0"-"9", "_"])* >
+|   < ENTERO : (["0"-"9"])+ >
+|   < DECIMAL : (["0"-"9"])+ "." (["0"-"9"])* >
+|   < CADENA : "\"" (~["\"","\n","\r"])* "\"" >
+|	< CARACTER : "\'" ( ~["\'","\\","\n","\r"] | "\\" ["n","t","b","r","f","\\","\'"] ) "\'">
+}
+ 
+SKIP : {
+	" "
+| "\t"
+| "\r"
+| "\n"
+| <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+| <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
+}
+
+TOKEN : {
+    < INVALIDO : ~[] >
+}
+
+/*
+	funcion clasePrincipal{
+		aqui va lo que se tenga que poner, if, while, for, declaracion de variables etc...
+	}
+*/
+void programaPrincipal():{}
+{
+	(crearFuncion())*
+	<COMIENZO> <IDENTIFIER> <ALL>
+	sentencias()
+	<CLL>
+}
+
+void sentencias():{}
+{
+	(declararVariables()
+	|imprimirPantalla()
+	|reglaIfElse()
+	|reglaFor()
+	|reglaWhile()
+	|reglaDoWhile()
+	|reglaSwitch()
+	|crearFuncion()
+	|LOOKAHEAD(2) llamarFuncion() <PC>
+	|LOOKAHEAD(2) incDec()
+	|LOOKAHEAD(2) reasignarVariable()
+	)*
+}
+ 
+void incDec():{}
+{
+	<IDENTIFIER> (<INC>|<DEC>) <PC>
+}
+
+/*
+var (int|float|string|boolean) nombre;
+var (int|float|string|boolean) nombre = valor;
+const (int|float|string|boolean) nombre = valor;
+*/
+
+void declararVariables():{}
+{
+	varNormal()|varConst()
+}
+
+/* 
+int nombre = entero ó int nombre;
+float nombre = decimal ó float nombre;
+string nombre = cadena ó string nombre;
+boolean nombre = true | false;
+*/
+void varNormal():{}
+{
+	<MERCURIO> (
+		<PIEDRA> <IDENTIFIER> [<TRANSMUTAR> (LOOKAHEAD(2) operacionesMath() | <ENTERO> | LOOKAHEAD(2) llamarFuncion())]
+	|	<ELIXIR> <IDENTIFIER> [<TRANSMUTAR> (LOOKAHEAD(2) operacionesMath() | <DECIMAL> | LOOKAHEAD(2) llamarFuncion())]
+	|	<PERGAMINO> <IDENTIFIER> [<TRANSMUTAR> <CADENA> | LOOKAHEAD(2) llamarFuncion()]
+	|	<RUNA> <IDENTIFIER> [<TRANSMUTAR> <CARACTER> | LOOKAHEAD(2) llamarFuncion()] 
+	|	<ESENCIA> <IDENTIFIER> <TRANSMUTAR> (<PURO> | <IMPURO> | LOOKAHEAD(2) llamarFuncion())	
+	) 
+	<PC>
+}
+
+void varConst():{}
+{
+	<ORO>(
+		<PIEDRA> <IDENTIFIER> <TRANSMUTAR> (LOOKAHEAD(2) operacionesMath() | <ENTERO> | LOOKAHEAD(2) llamarFuncion())
+	|	<ELIXIR> <IDENTIFIER> <TRANSMUTAR> (LOOKAHEAD(2) operacionesMath() | <DECIMAL> | LOOKAHEAD(2) llamarFuncion())
+	|	<PERGAMINO> <IDENTIFIER> <TRANSMUTAR> (<CADENA> | LOOKAHEAD(2) llamarFuncion())
+	|	<RUNA> <IDENTIFIER> <TRANSMUTAR> (<CARACTER> | LOOKAHEAD(2) llamarFuncion())
+	|	<ESENCIA> <IDENTIFIER> <TRANSMUTAR> (<PURO> | <IMPURO> | LOOKAHEAD(2) llamarFuncion())	
+	)
+	<PC>
+}
+
+void reasignarVariable():{}
+{
+	<IDENTIFIER> <TRANSMUTAR> (LOOKAHEAD(2) operacionesMath() | valores()) <PC>
+}
+
+void operacionesMath():{}
+{
+	valTipOp() signos() valTipOp() (opMathExtra())*
+}
+
+void opMathExtra():{}
+{
+	signos() valTipOp()
+}
+
+void valTipOp():{}
+{
+	<IDENTIFIER>
+|	<ENTERO>
+|	<DECIMAL>
+}
+
+void signos():{}
+{
+	<MEZCLAR>
+|	<SEPARAR>
+|	<FUSIONAR>
+|	<DESTILAR>
+}
+
+//print("Hola mundo"); ó print(nombre);
+void imprimirPantalla():{}
+{
+	<REVELAR> <AP> (<CADENA>|<IDENTIFIER>) (extraPrint())* <CP> <PC>
+}
+
+void extraPrint():{}
+{
+	<ON> (<CADENA>|<IDENTIFIER>)
+}
+/*
+	if(){
+		agregar lo que quieras if,for,print, etc...
+	}
+	
+	en caso boolean nombre = false; if(!nombre)
+	en caso boolean nombre = true; if(nombre)
+	
+	if(id operador id); y viceversa.
+	if(id operador entero); y viceversa. 
+	if(id operador cadena); y viceversa.
+*/
+void reglaIfElse():{}
+{
+	<CATALIZAR> <AC> validaciones() <CC> <ALL>
+		sentencias()
+	<CLL> (LOOKAHEAD(2) reglaElseIf())* [reglaElse()]
+}
+
+void reglaElse():{}
+{
+	<INERTE> <ALL>
+		sentencias()
+	<CLL>
+}
+
+void reglaElseIf():{}
+{	
+	<INERTE> <CATALIZAR> <AC> validaciones() <CC> <ALL>
+		sentencias()
+	<CLL>
+}
+
+/*
+	for(int i=valor;i operador id; i++){
+		
+	}
+*/
+void reglaFor():{}
+{
+	<CALCINAR> <AC> inicializacionFor() parametroFor() parametroDecIncFor() <CC> <ALL>
+		sentencias()
+	<CLL>
+}
+
+void inicializacionFor():{}
+{
+	[<MERCURIO> <PIEDRA> <IDENTIFIER> <TRANSMUTAR> <ENTERO>] <PC>  
+}
+
+void parametroFor():{}
+{
+	<IDENTIFIER> operadores() (<ENTERO>|<IDENTIFIER>) <PC>
+}
+
+void parametroDecIncFor():{}
+{
+	<IDENTIFIER> (<INC>|<DEC>)
+}
+
+/*
+	while(condicion){
+	
+	}
+*/
+
+void reglaWhile():{}
+{
+	<HERVIR> <AC> validaciones() <CC> <ALL>
+		sentencias()
+	<CLL>
+}
+
+/*
+	do{
+	
+	}while()
+*/
+void reglaDoWhile():{}
+{
+	<CONGELAR> <ALL>
+		sentencias()
+	<CLL> <HERVIR> <AC> validaciones() <CC> <PC>
+}
+
+/*
+	switch(valor){
+		case valor:
+		break;
+		default:
+		break;
+	}
+*/
+
+void reglaSwitch():{}
+{
+	<CRISOL> <AC> <IDENTIFIER> <CC> <ALL>
+		(casosSwitch())+
+		[defaultSwitch()]
+	<CLL>
+}
+
+void casosSwitch():{}
+{
+	<FASE> (<ENTERO>|<CADENA>|<CARACTER>) <DP>
+	sentencias()
+	<ROMPER> <PC>
+}
+
+void defaultSwitch():{}
+{
+	<DEFECTO> <DP>
+	imprimirPantalla()
+	<ROMPER> <PC>
+}
+
+void crearFuncion():{}
+{
+	<FUNCION> <IDENTIFIER> <AC> [parametroFuncion()] <CC> <ALL>
+		sentencias()
+		[<RETORNO> valores() <PC>]
+	<CLL>
+}
+
+void parametroFuncion():{}
+{
+	<MERCURIO> tipoVar() <IDENTIFIER> (<COMA> <MERCURIO> tipoVar() <IDENTIFIER>)*
+}
+
+void llamarFuncion():{}
+{	
+	<IDENTIFIER> <AP> [paramLlamFun()] <CP>
+}
+
+void paramLlamFun():{}
+{
+	valores() (<COMA> valores())*
+}
+
+void tipoVar():{}
+{
+	<RUNA>
+|	<PIEDRA>
+|	<ELIXIR>
+|	<ESENCIA>
+|	<PERGAMINO>
+}
+
+void valores():{}
+{
+	<IDENTIFIER>
+|	<ENTERO>
+|	<DECIMAL>
+|	<CADENA>
+| 	<CARACTER>
+|	(<PURO>|<IMPURO>)
+} 
+
+void validaciones():{}
+{
+	condicionalInicial() (condicionalExtra())* 
+}
+
+void condicionalExtra():{}
+{
+	(<YY>|<OO>) [<NO>] valores() [operadores() valores()]
+}
+
+void condicionalInicial():{}
+{
+	[<NO>] valores() [operadores() valores()]
+}
+
+void operadores():{}
+{
+	<EQUIVALENTE>
+|	<DD>
+|	<MEQ>
+|	<MAQ>
+|	<MAQI>
+|	<MEQI>
+}

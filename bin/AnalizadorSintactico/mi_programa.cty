@@ -1,0 +1,48 @@
+funcion clasePrincipal pruebaCorchetes {
+
+    oro piedra MAX_INTENTOS transmutar 3 ;
+    mercurio pergamino titulo transmutar "Verificacion de Corchetes" ;
+    mercurio elixir totalProcesado transmutar 0.0 ;
+    mercurio esencia ejecucionActiva transmutar puro ;
+
+    funcion procesarOperacion [ mercurio elixir valA , mercurio elixir valB ] {
+        mercurio elixir subtotal transmutar valA mezclar valB fusionar 2.5 separar 1.0 destilar 2.0 ;
+        retorno subtotal ;
+    }
+
+    revelar ( "Iniciando: " ~ titulo ) ;
+
+    calcinar [ mercurio piedra i transmutar 1 ; i <= MAX_INTENTOS ; i ++ ] {
+        
+        catalizar [ i == 1 || i == 2 ] {
+            totalProcesado transmutar totalProcesado mezclar 10.5 ;
+        } inerte catalizar [ i == 3 ] {
+            totalProcesado transmutar totalProcesado fusionar 2.0 ;
+        } inerte {
+            ejecucionActiva transmutar impuro ;
+        }
+
+        crisol [ i ] {
+            fase 1 :
+                revelar ( "Fase 1 completa" ) ;
+                romper ;
+            fase 2 :
+                revelar ( "Fase 2 completa" ) ;
+                romper ;
+            defecto :
+                revelar ( "Fase final" ) ;
+                romper ;
+        }
+    }
+
+    mercurio piedra cuentaRegresiva transmutar 3 ;
+    hervir [ cuentaRegresiva > 0 ] {
+        cuentaRegresiva -- ;
+    }
+
+    congelar {
+        revelar ( "Limpieza finalizada" ) ;
+    } hervir [ !ejecucionActiva ] ;
+
+    llamarCalculo ( 15.0 , 5.0 ) ;
+}

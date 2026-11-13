@@ -1,0 +1,93 @@
+options{
+	IGNORE_CASE = false;
+	STATIC = false;
+	BUILD_PARSER = true;
+}
+
+PARSER_BEGIN(AlquimiaParser)
+
+public class AlquimiaParser{}
+
+PARSER_END(AlquimiaParser)
+ 
+//PALABRAS RESERVADAS
+TOKEN: {
+	<COMIENZO : "funcion clasePrincipal"> //Palabra para crear el main.
+|	<MERCURIO : "mercurio"> //variable
+|	<ORO : "oro"> //constante
+|	<RUNA : "runa"> //char
+|	<PIEDRA : "piedra"> //int
+|	<ELIXIR : "elixir"> //float
+|	<PERGAMINO : "pergamino"> //string
+|	<ESENCIA : "esencia"> //boolean
+|	<CATALIZAR : "catalizar"> //if
+|	<INERTE : "inerte"> //else
+|	<HERVIR : "hervir"> //while
+|	<CALCINAR : "calcinar"> //for
+|	<CRISOL : "crisol"> //switch
+|	<FASE : "fase"> //case
+|	<DEFECTO : "defecto"> //default
+|	<REVELAR : "revelar"> //print
+|	<PURO : "puro"> //true
+|	<IMPURO : "impuro"> //false
+|	<ROMPER : "romper"> //break
+|	<CONGELAR : "congelar"> //do
+|	<FUNCION : "funcion">
+|	<RETORNO : "retorno">
+}
+ 
+//OPERADORES
+TOKEN: {
+    < MEZCLAR : "mezclar" > //suma
+|   < SEPARAR : "separar" > //resta
+|   < FUSIONAR : "fusionar" > //multiplicacion
+|   < DESTILAR : "destilar" > //division
+|   < TRANSMUTAR : "transmutar" > //asignacion
+|   < EQUIVALENTE : "==" >
+|   < DD : "!=" >
+|   < MEQ : "<" >
+|   < MAQ : ">" >
+|   < MAQI : ">=" >
+|   < MEQI : "<=" >
+|   < YY : "&&" >
+|   < OO : "||" >
+|   < NO : "!" >
+}
+ 
+//SIGNOS DE PUNTUACION, APERTURA Y SIMBOLOS
+TOKEN : {
+    < AP : "(" >
+|   < CP : ")" >
+|   < ALL : "{" >
+|   < CLL : "}" >
+|   < AC : "[" >
+|   < CC : "]" >
+|   < COMA : "," >
+|   < PC : ";" >
+|	< CD : "\"">
+|	< INC : "++">
+|	< DEC : "--">
+|	< DP : ":">
+|   <ON : "~">
+}
+
+TOKEN : {
+    < IDENTIFIER : (["a"-"z", "A"-"Z", "_"]) (["a"-"z", "A"-"Z", "0"-"9", "_"])* >
+|   < ENTERO : (["0"-"9"])+ >
+|   < DECIMAL : (["0"-"9"])+ "." (["0"-"9"])* >
+|   < CADENA : "\"" (~["\"","\n","\r"])* "\"" >
+|	< CARACTER : "\'" ( ~["\'","\\","\n","\r"] | "\\" ["n","t","b","r","f","\\","\'"] ) "\'">
+}
+ 
+SKIP : {
+	" "
+| "\t"
+| "\r"
+| "\n"
+| <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+| <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
+}
+
+TOKEN : {
+    < INVALIDO : ~[] >
+}

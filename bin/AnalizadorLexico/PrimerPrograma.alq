@@ -1,0 +1,48 @@
+funcion clasePrincipal granPruebaFinal {
+
+    oro piedra MAX_INTENTOS transmutar 3 ;
+    mercurio pergamino titulo transmutar "Sistema Alquimico" ;
+    mercurio elixir totalProcesado transmutar 0.0 ;
+    mercurio esencia ejecucionActiva transmutar puro ;
+
+    funcion procesarOperacion ( mercurio elixir valA , mercurio elixir valB ) {
+        mercurio elixir subtotal transmutar valA mezclar valB fusionar 2.5 separar 1.0 destilar 2.0 ;
+        retorno subtotal ;
+    }
+
+    revelar ( "Iniciando: " ~ titulo ~ " | Intentos permitidos: " ~ "3" ) ;
+
+    calcinar ( mercurio piedra i transmutar 1 ; i <= MAX_INTENTOS ; i ++ ) {
+        
+        catalizar ( i == 1 || i == 2 ) {
+            totalProcesado transmutar totalProcesado mezclar 10.5 ;
+        } inerte catalizar ( i == 3 ) {
+            totalProcesado transmutar totalProcesado fusionar 2.0 ;
+        } inerte {
+            ejecucionActiva transmutar impuro ;
+        }
+
+        crisol ( i ) {
+            fase 1 :
+                revelar ( "Paso 1 completado" ) ;
+                romper ;
+            fase 2 :
+                revelar ( "Paso 2 completado" ) ;
+                romper ;
+            defecto :
+                revelar ( "Fase final alcanzada" ) ;
+                romper ;
+        }
+    }
+
+    mercurio piedra cuentaRegresiva transmutar 3 ;
+    hervir ( cuentaRegresiva > 0 ) {
+        cuentaRegresiva -- ;
+    }
+
+    congelar {
+        revelar ( "Limpieza realizada" ) ;
+    } hervir ( !ejecucionActiva ) ;
+
+    calcularOperacion ( 15.0 , 5.0 ) ;
+}
